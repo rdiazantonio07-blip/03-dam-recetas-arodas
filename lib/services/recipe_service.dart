@@ -1,69 +1,27 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:recetasapp/models/receta.dart';
+import 'package:http/http.dart' as http;
 
-class RecetaCard extends StatelessWidget {
-  final Receta receta;
-  final VoidCallback? onTap;
+class RecipeService {
+  static const String _baseUrl = "https://dummyjson.com/recipes";
 
-  const RecetaCard({super.key, required this.receta, this.onTap});
+  Future<List<Receta>> obtenerRecetas() async {
+    final Uri url = Uri.parse(_baseUrl);
+    final http.Response respuesta = await http.get(url);
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  receta.imagenUrl,
-                  width: 72,
-                  height: 72,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stack) => Image.asset(
-                    'assets/images/plato-placeholder.jpg',
-                    width: 72,
-                    height: 72,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      receta.nombre,
-                      style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${receta.cocina} · ${receta.dificultad} · ${receta.tiempoTotal} min',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    // Evaluamos la respuesta
+    if (respuesta.statusCode == 200) {
+      final Map<String, dynamic> datos = jsonDecode(respuesta.body);
+      final List<dynamic> listaRecetas = datos['recipes'];
+      print(listaRecetas);
+      return listaRecetas
+          .map((recetaJson) => Receta.fromJson(recetaJson))
+          .toList();
+    } else {
+      throw Exception(
+        "Error al obtener las recetas: ${respuesta.statusCode}",
+      );
+    }
   }
 }

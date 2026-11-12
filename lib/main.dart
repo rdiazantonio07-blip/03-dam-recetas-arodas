@@ -4,7 +4,7 @@ import 'package:recetasapp/screens/splash_screen.dart';
 void main() {
   runApp(const RecetasApp());
 }
-
+//Antonio Rodas Diaz
 class RecetasApp extends StatelessWidget {
   const RecetasApp({super.key});
 
